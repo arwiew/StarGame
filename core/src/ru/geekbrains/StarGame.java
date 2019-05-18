@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class StarGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture img;
-	TextureRegion region; // позволяет вырезать какую-то часть текстуры из картинки
+	TextureRegion region; // позволяет вырезать какую-то часть текстуры из картинки...
 
 	@Override
 	public void create () {
