@@ -1,20 +1,24 @@
 package ru.geekbrains.Sprite;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.TextureData;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.geekbrains.Base.Sprite;
 import ru.geekbrains.Math.Rect;
 
-public class IcoMove extends Sprite {
+public class Ship extends Sprite {
 
     private Vector2 touch;
     private Vector2 speed;
     private Vector2 buf;
 
-    public IcoMove(TextureRegion region) {
-        super(region);
+
+
+    public Ship(TextureAtlas atlas) {
+        super(atlas.findRegion("oie_2204520X3lN2eK3"));
         regions[frame].getTexture().setFilter(Texture.TextureFilter.Linear,Texture.TextureFilter.Linear);
         touch = new Vector2();
         speed = new Vector2();
@@ -23,7 +27,7 @@ public class IcoMove extends Sprite {
 
     @Override
     public void resize(Rect worldBounds) {
-        setHeightProportion(0.2f);
+        setHeightProportion(0.1f);
     }
 
     @Override
