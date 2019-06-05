@@ -2,30 +2,17 @@ package ru.geekbrains.Sprite;
 
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-
-
-import ru.geekbrains.Base.Sprite;
 import ru.geekbrains.Math.Rect;
 import ru.geekbrains.Pool.BulletPool;
 
-public class MyShip extends Sprite {
+public class MyShip extends Ship {
 
     private static final int INVALID_POINTER = -1;
-
-    private Vector2 v;
-    private final Vector2 v0;
-    private Vector2 bulletV;
-    private Vector2 bulletPos;
-    private Rect worldBounds;
-    private BulletPool bulletPool;
-    private TextureRegion bulletRegion;
     private boolean pressedLeft;
     private boolean pressedRight;
-    private float shootTime;
-    private float delaTimer;
 
     private int leftPointer = INVALID_POINTER;
     private int rightPointer = INVALID_POINTER;
@@ -42,16 +29,18 @@ public class MyShip extends Sprite {
         bulletPos = new Vector2();
      } */
 
-     public MyShip(TextureAtlas atlas, BulletPool bulletPool) {
+     public MyShip(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.bulletPool = bulletPool;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         v = new Vector2();
         v0 = new Vector2(0.5f, 0);
         bulletV = new Vector2(0, 0.5f);
-        bulletPos = new Vector2();
-        shootTime = 0.1f;
-
+        this.shootTime = 0.35f;
+        this.bulletHeight = 0.01f;
+        this.damage = 1;
+        this.bulletSound = bulletSound;
+        this.hp = 100;
 
     }
 
@@ -176,13 +165,8 @@ public class MyShip extends Sprite {
 
      private void shoot() {
         Bullet bullet = bulletPool.obtain();
-        bulletPos.set(pos);
-        bulletPos.y += getHalfHeight();
-        bullet.set(this, bulletRegion, bulletPos, bulletV, 0.01f, worldBounds, 1);
+        bullet.set(this, bulletRegion, pos, bulletV, bulletHeight, worldBounds, 1);
     }
 
-    private void notShoot(){
-
-    }
 
 }

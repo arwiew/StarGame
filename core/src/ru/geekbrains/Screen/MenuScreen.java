@@ -30,7 +30,7 @@ public class MenuScreen extends BaseScreen {
  private Star[] starArray;
  private ButtonExit buttonExit;
  private ButtonPlay buttonPlay;
- private Sound sound;
+
 
 
     public MenuScreen(Game game) {
@@ -49,8 +49,6 @@ public void show(){
     }
     buttonExit = new ButtonExit(atlas);
     buttonPlay = new ButtonPlay(atlas, game);
-    sound = Gdx.audio.newSound(Gdx.files.internal("Sound/music.mp3"));
-    sound.play();
     }
 
     @Override
