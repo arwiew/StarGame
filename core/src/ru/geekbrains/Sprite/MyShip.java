@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import ru.geekbrains.Math.Rect;
 import ru.geekbrains.Pool.BulletPool;
+import ru.geekbrains.Pool.ExplosionPool;
 
 public class MyShip extends Ship {
 
@@ -29,8 +30,9 @@ public class MyShip extends Ship {
         bulletPos = new Vector2();
      } */
 
-     public MyShip(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
+     public MyShip(TextureAtlas atlas, BulletPool bulletPool, ExplosionPool explosionPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
+        this.explosionPool = explosionPool;
         this.bulletPool = bulletPool;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         v = new Vector2();
@@ -40,7 +42,7 @@ public class MyShip extends Ship {
         this.bulletHeight = 0.01f;
         this.damage = 1;
         this.bulletSound = bulletSound;
-        this.hp = 100;
+        this.hp = 1;
 
     }
 
@@ -130,6 +132,15 @@ public class MyShip extends Ship {
                 break;
         }
         return false;
+    }
+
+    public boolean isBulletCollision(Rect bullet) {
+        return !(
+                bullet.getRight() < getLeft()
+                        || bullet.getLeft() > getRight()
+                        || bullet.getBottom() > pos.y
+                        || bullet.getTop() < getBottom()
+        );
     }
 
     private void moveRight() {
