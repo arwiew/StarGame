@@ -12,6 +12,7 @@ import ru.geekbrains.Pool.ExplosionPool;
 public class MyShip extends Ship {
 
     private static final int INVALID_POINTER = -1;
+    private static final int HP = 100;
     private boolean pressedLeft;
     private boolean pressedRight;
 
@@ -42,7 +43,7 @@ public class MyShip extends Ship {
         this.bulletHeight = 0.01f;
         this.damage = 1;
         this.bulletSound = bulletSound;
-        this.hp = 1;
+        this.hp = HP;
 
     }
 
@@ -155,6 +156,8 @@ public class MyShip extends Ship {
         v.setZero();
     }
 
+
+
     @Override
     public void update(float delta){
     super.update(delta);
@@ -179,5 +182,14 @@ public class MyShip extends Ship {
         bullet.set(this, bulletRegion, pos, bulletV, bulletHeight, worldBounds, 1);
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        pressedLeft = false;
+        pressedRight = false;
+        leftPointer = INVALID_POINTER;
+        rightPointer = INVALID_POINTER;
+        stop();
 
+    }
 }

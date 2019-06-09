@@ -9,10 +9,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 
 import java.util.List;
 
 import ru.geekbrains.Base.BaseScreen;
+import ru.geekbrains.Base.Font;
 import ru.geekbrains.Math.Rect;
 import ru.geekbrains.Pool.BulletPool;
 import ru.geekbrains.Pool.EnemyPool;
@@ -26,9 +28,14 @@ import ru.geekbrains.Sprite.MyShip;
 import ru.geekbrains.Sprite.Star;
 import ru.geekbrains.Utils.EnemyGenerator;
 
+import static com.badlogic.gdx.Input.Keys.A;
+
 public class GameScreen extends BaseScreen {
 
     private static final int STAR_COUNT = 64;
+    private static final String FRAGS = "FRAGS : ";
+    private static final String HP = "HP : ";
+    private static final String LEVEL = "LEVEL :";
 
     private enum State {PLAYNG, PAUSE, GAME_OVER}
 
@@ -57,9 +64,17 @@ public class GameScreen extends BaseScreen {
     private ButtonNewGame buttonNewGame;
     private Game game;
 
+    private int frags;
+    private Font font;
+    private StringBuilder sbFrags;
+    private StringBuilder sbHP;
+    private StringBuilder sbLevel;
+
     @Override
     public void show() {
         super.show();
+        font = new Font("Font/font.fnt","Font/font.png");
+        font.setSize(0.03f);
         music = Gdx.audio.newMusic(Gdx.files.internal("Sound/music.mp3"));
         music.setLooping(true);
         music.play();
@@ -81,7 +96,11 @@ public class GameScreen extends BaseScreen {
         enemyGenerator = new EnemyGenerator(worldBounds, enemyPool, atlas);
         messageGameOver = new MessageGameOver(atlas);
         state = State.PLAYNG;
-        buttonNewGame = new ButtonNewGame(atlas, game);
+        buttonNewGame = new ButtonNewGame(atlas, game, this);
+        frags = 0;
+        sbFrags = new StringBuilder();
+        sbHP = new StringBuilder();
+        sbLevel = new StringBuilder();
         //  myShip = new MyShip(atlas1,bulletPool);// собственный корабль
     }
 
@@ -122,7 +141,7 @@ public class GameScreen extends BaseScreen {
                 myShip.update(delta);
                 bulletPool.updateActiveSprites(delta);
                 enemyPool.updateActiveSprites(delta);
-                enemyGenerator.generate(delta);
+                enemyGenerator.generate(delta, frags);
         }
 
     }
@@ -145,13 +164,25 @@ public class GameScreen extends BaseScreen {
             buttonNewGame.draw(batch);
             bulletPool.getActiveObjects().clear();
             enemyPool.getActiveObjects().clear();
+            frags = 0;
+
             if (state == State.PLAYNG) {
                 myShip.draw(batch);
                 bulletPool.drawActiveSprites(batch);
                 enemyPool.drawActiveSprites(batch);
             }
         }
+        printInfo();
         batch.end();
+    }
+
+    private void printInfo(){
+        sbFrags.setLength(0);
+        font.draw(batch, sbFrags.append(FRAGS).append(frags), worldBounds.getLeft(), worldBounds.getTop()-0.01f);
+        sbHP.setLength(0);
+        font.draw(batch, sbHP.append(HP).append(myShip.getHp()), worldBounds.pos.x, worldBounds.getTop()-0.01f, Align.center);
+        sbLevel.setLength(0);
+        font.draw(batch, sbLevel.append(LEVEL).append(enemyGenerator.getLevel()), worldBounds.getRight(), worldBounds.getTop()-0.01f, Align.right);
     }
 
     private void freeAllDestroyedActiveObjects() {
@@ -181,6 +212,7 @@ public class GameScreen extends BaseScreen {
         explosionSound.dispose();
         bulletSound.dispose();
         music.dispose();
+        font.dispose();
         super.dispose();
     }
 
@@ -205,7 +237,9 @@ public class GameScreen extends BaseScreen {
         if (state == State.PLAYNG) {
             myShip.touchDown(touch, pointer);
         }
-        buttonNewGame.touchDown(touch, pointer);
+        if (state == State.GAME_OVER){
+            buttonNewGame.touchDown(touch, pointer);
+        }
         return false;
     }
 
@@ -214,8 +248,10 @@ public class GameScreen extends BaseScreen {
         if (state == State.PLAYNG) {
             myShip.touchUp(touch, pointer);
         }
-        buttonNewGame.touchUp(touch,pointer);
-        state = State.PLAYNG;
+        if (state == State.GAME_OVER){
+            buttonNewGame.touchUp(touch,pointer);
+            state = State.PLAYNG;
+        }
         return false;
     }
 
@@ -232,8 +268,8 @@ public class GameScreen extends BaseScreen {
                 continue;
             }
             if (enemy.pos.cpy().sub(myShip.pos).len() <= 0.05f) {
-                enemy.destroy(); //////////////////////////////////////////////
-                myShip.destroy();
+                enemy.destroy();
+                myShip.damage(myShip.getHp());
                 state=State.GAME_OVER;
             }
 
@@ -243,6 +279,9 @@ public class GameScreen extends BaseScreen {
                 }
                 if (enemy.isBulletCollision(bullet)) {
                     enemy.damage(bullet.getDamage());
+                    if (enemy.isDestroyed()){
+                        frags ++;
+                    }
                     bullet.destroy();
                 }
             }
