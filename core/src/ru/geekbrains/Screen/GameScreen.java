@@ -28,14 +28,12 @@ import ru.geekbrains.Sprite.MyShip;
 import ru.geekbrains.Sprite.Star;
 import ru.geekbrains.Utils.EnemyGenerator;
 
-import static com.badlogic.gdx.Input.Keys.A;
-
 public class GameScreen extends BaseScreen {
 
     private static final int STAR_COUNT = 64;
-    private static final String FRAGS = "FRAGS : ";
+    private static final String SCORE = "SCORE : ";
     private static final String HP = "HP : ";
-    private static final String LEVEL = "LEVEL :";
+    private static final String LEVEL = "LEVEL : ";
 
     private enum State {PLAYNG, PAUSE, GAME_OVER}
 
@@ -43,6 +41,7 @@ public class GameScreen extends BaseScreen {
     private Background background;
     private TextureAtlas atlas;
     private TextureAtlas atlas1;
+    private TextureAtlas atlas2;
     private Star[] starArray;
     private MyShip myShip;
 
@@ -64,7 +63,7 @@ public class GameScreen extends BaseScreen {
     private ButtonNewGame buttonNewGame;
     private Game game;
 
-    private int frags;
+    private int score;
     private Font font;
     private StringBuilder sbFrags;
     private StringBuilder sbHP;
@@ -84,24 +83,25 @@ public class GameScreen extends BaseScreen {
         bg = new Texture("fon.jpg");
         background = new Background(new TextureRegion(bg));
         atlas = new TextureAtlas("Textures/mainAtlas.tpack");
-        atlas1 = new TextureAtlas("Textures/Ship.pack");
+        atlas1 = new TextureAtlas("Textures/new_pack.pack");
+        atlas2 = new TextureAtlas("Textures/meteo.pack");
         starArray = new Star[STAR_COUNT];
         for (int i = 0; i < STAR_COUNT; i++) {
             starArray[i] = new Star(atlas);
         }
         bulletPool = new BulletPool();
         explosionPool = new ExplosionPool(atlas, explosionSound);
-        myShip = new MyShip(atlas, bulletPool, explosionPool, laserSound);
+        myShip = new MyShip(atlas1, bulletPool, explosionPool, laserSound);
         enemyPool = new EnemyPool(explosionPool, bulletPool, bulletSound, worldBounds, myShip);
-        enemyGenerator = new EnemyGenerator(worldBounds, enemyPool, atlas);
+        enemyGenerator = new EnemyGenerator(worldBounds, enemyPool, atlas,atlas2);
         messageGameOver = new MessageGameOver(atlas);
         state = State.PLAYNG;
         buttonNewGame = new ButtonNewGame(atlas, game, this);
-        frags = 0;
+        score = 0;
         sbFrags = new StringBuilder();
         sbHP = new StringBuilder();
         sbLevel = new StringBuilder();
-        //  myShip = new MyShip(atlas1,bulletPool);// собственный корабль
+
     }
 
     @Override
@@ -141,14 +141,14 @@ public class GameScreen extends BaseScreen {
                 myShip.update(delta);
                 bulletPool.updateActiveSprites(delta);
                 enemyPool.updateActiveSprites(delta);
-                enemyGenerator.generate(delta, frags);
+                enemyGenerator.generate(delta, score);
         }
 
     }
 
     private void draw() {
-        Gdx.gl.glClearColor(0.4f, 0.3f, 0.9f, 0.5f); //МОЖНО ЗАДАТЬ ФОН
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); //очистка экрана, работеат в паре с ClaerColor
+        Gdx.gl.glClearColor(0.4f, 0.3f, 0.9f, 0.5f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         background.draw(batch);
         for (Star star : starArray) {
@@ -164,8 +164,7 @@ public class GameScreen extends BaseScreen {
             buttonNewGame.draw(batch);
             bulletPool.getActiveObjects().clear();
             enemyPool.getActiveObjects().clear();
-            frags = 0;
-
+            score = 0;
             if (state == State.PLAYNG) {
                 myShip.draw(batch);
                 bulletPool.drawActiveSprites(batch);
@@ -178,7 +177,7 @@ public class GameScreen extends BaseScreen {
 
     private void printInfo(){
         sbFrags.setLength(0);
-        font.draw(batch, sbFrags.append(FRAGS).append(frags), worldBounds.getLeft(), worldBounds.getTop()-0.01f);
+        font.draw(batch, sbFrags.append(SCORE).append(score), worldBounds.getLeft(), worldBounds.getTop()-0.01f);
         sbHP.setLength(0);
         font.draw(batch, sbHP.append(HP).append(myShip.getHp()), worldBounds.pos.x, worldBounds.getTop()-0.01f, Align.center);
         sbLevel.setLength(0);
@@ -189,6 +188,7 @@ public class GameScreen extends BaseScreen {
         bulletPool.freeAllDestroyedActiveSprites();
         explosionPool.freeAllDestroyedActiveSprites();
         enemyPool.freeAllDestroyedActiveSprites();
+
     }
 
     @Override
@@ -250,9 +250,21 @@ public class GameScreen extends BaseScreen {
         }
         if (state == State.GAME_OVER){
             buttonNewGame.touchUp(touch,pointer);
-            state = State.PLAYNG;
+            buttonNewGame.action();
+
         }
         return false;
+    }
+
+    public void startGame(){
+        bulletPool.freeAllActiveObjects();
+        explosionPool.freeAllActiveObjects();
+        enemyPool.freeAllActiveObjects();
+        score = 0;
+        myShip.setHp(100);
+        myShip.pos.x = worldBounds.pos.x;
+        myShip.flushDestroy();
+        state = State.PLAYNG;
     }
 
     private void enemyDestroy() {
@@ -262,6 +274,7 @@ public class GameScreen extends BaseScreen {
         }
         List<Enemy> enemyCollection = enemyPool.getActiveObjects();
         List<Bullet> bulletList = bulletPool.getActiveObjects();
+
 
         for (Enemy enemy : enemyCollection) {
             if (enemy.isDestroyed()) {
@@ -273,6 +286,7 @@ public class GameScreen extends BaseScreen {
                 state=State.GAME_OVER;
             }
 
+
             for (Bullet bullet : bulletList) {
                 if (bullet.getOwner() != myShip || bullet.isDestroyed()) {
                     continue;
@@ -280,7 +294,7 @@ public class GameScreen extends BaseScreen {
                 if (enemy.isBulletCollision(bullet)) {
                     enemy.damage(bullet.getDamage());
                     if (enemy.isDestroyed()){
-                        frags ++;
+                        score = enemy.getScore() + score;
                     }
                     bullet.destroy();
                 }
@@ -293,11 +307,16 @@ public class GameScreen extends BaseScreen {
             if (myShip.isBulletCollision(bullet)) {
                 myShip.damage(bullet.getDamage());
                 bullet.destroy();
+                if (myShip.getHp()<=0) {
+                    state = State.GAME_OVER;
+                }
                 if (myShip.isDestroyed()){
                     state = State.GAME_OVER;
                 }
             }
         }
+
+
     }
 }
 

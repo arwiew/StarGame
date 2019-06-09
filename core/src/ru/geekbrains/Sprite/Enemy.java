@@ -11,6 +11,7 @@ import ru.geekbrains.Pool.ExplosionPool;
 public class Enemy extends Ship {
 
     MyShip myShip;
+    int score;
 
     public Enemy(BulletPool bulletPool, ExplosionPool explosionPool, Sound bulletSound, Rect worldBounds,  MyShip myShip) {
         this.explosionPool = explosionPool;
@@ -22,6 +23,11 @@ public class Enemy extends Ship {
         this.bulletV = new Vector2();
         this.exitV = new Vector2();
         this.myShip = myShip;
+        this.score = score;
+    }
+
+    public int getScore() {
+        return score;
     }
 
     @Override
@@ -48,7 +54,8 @@ public class Enemy extends Ship {
             int damage,
             float shootTime,
             float height,
-            int hp
+            int hp,
+            int score
     ) {
         this.regions = regions;
         this.v0.set(v0);
@@ -62,6 +69,7 @@ public class Enemy extends Ship {
         setHeightProportion(height);
         this.hp = hp;
         this.v.set(v0);
+        this.score = score;
     }
 
     public boolean isBulletCollision(Rect bullet) {

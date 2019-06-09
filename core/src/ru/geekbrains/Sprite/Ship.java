@@ -33,6 +33,7 @@ public abstract class Ship extends Sprite {
     private float damageanimateTimer = damageAnimateInterval;
 
     protected Sound bulletSound;
+    private boolean isShooting = true;
 
     public Ship(TextureRegion region, int rows, int cols, int frames) {
         super(region, rows, cols, frames);
@@ -45,16 +46,18 @@ public abstract class Ship extends Sprite {
     public void update(float delta) {
         super.update(delta);
         pos.mulAdd(v, delta);
-        delaTimer += delta;
-        if (delaTimer >= shootTime) {
-            shoot();
-            delaTimer -= shootTime;
-            damageanimateTimer+=delta;
-            if (damageanimateTimer >= damageanimateTimer){
-                frame = 0;
+                   delaTimer += delta;
+            if (delaTimer >= shootTime) {
+                    shoot();
+                    delaTimer -= shootTime;
+                    damageanimateTimer += delta;
             }
-        }
+                if (damageanimateTimer >= damageanimateTimer) {
+                    frame = 0;
+                }
     }
+
+
 
     @Override
     public void resize(Rect worldBounds) {
@@ -83,7 +86,7 @@ public abstract class Ship extends Sprite {
         bulletSound.play();
         Bullet bullet = bulletPool.obtain();
         bullet.set(this, bulletRegion, pos, bulletV, bulletHeight, worldBounds, damage);
-    }
+        }
 
     private void boom(){
         Explosion explosion = explosionPool.obtain();

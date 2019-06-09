@@ -19,23 +19,11 @@ public class MyShip extends Ship {
     private int leftPointer = INVALID_POINTER;
     private int rightPointer = INVALID_POINTER;
 
-    // Собственный корабль, не забыть добавить пули.
-
-/*   public MyShip(TextureAtlas atlas, BulletPool bulletPool) {
-        super(atlas.findRegion("oie_2204520X3lN2eK3"));
-        this.bulletPool = bulletPool;
-        this.bulletRegion = atlas.findRegion("bulletMainShip");
-        v = new Vector2();
-        v0 = new Vector2(0.5f, 0);
-        bulletV = new Vector2(0, 0.5f);
-        bulletPos = new Vector2();
-     } */
-
-     public MyShip(TextureAtlas atlas, BulletPool bulletPool, ExplosionPool explosionPool, Sound bulletSound) {
-        super(atlas.findRegion("main_ship"), 1, 2, 2);
+    public MyShip(TextureAtlas atlas, BulletPool bulletPool, ExplosionPool explosionPool, Sound bulletSound) {
+        super(atlas.findRegion("Ship"), 1, 2, 2);
         this.explosionPool = explosionPool;
         this.bulletPool = bulletPool;
-        this.bulletRegion = atlas.findRegion("bulletMainShip");
+        this.bulletRegion = atlas.findRegion("Ball");
         v = new Vector2();
         v0 = new Vector2(0.5f, 0);
         bulletV = new Vector2(0, 0.5f);
@@ -50,7 +38,7 @@ public class MyShip extends Ship {
     @Override
     public void resize(Rect worldBounds) {
         this.worldBounds = worldBounds;
-        setHeightProportion(0.1f);
+        setHeightProportion(0.12f);
         setBottom(worldBounds.getBottom()+0.05f);
     }
 

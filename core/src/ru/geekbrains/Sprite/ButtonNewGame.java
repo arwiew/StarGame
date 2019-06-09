@@ -10,8 +10,13 @@ import ru.geekbrains.Screen.GameScreen;
 public class ButtonNewGame extends ScaleTouchUpButton {
 
     private Game game;
-    private State state;
     private GameScreen gameScreen;
+    private MyShip myShip;
+
+    @Override
+    public void action() {
+    gameScreen.startGame();
+    }
 
     private enum State {PLAYNG, PAUSE, GAME_OVER}
 
@@ -24,13 +29,9 @@ public class ButtonNewGame extends ScaleTouchUpButton {
 
     @Override
     public void resize(Rect worldBounds) {
-        setRight(worldBounds.getRight() - 0.18f);
+        setHeightProportion(0.05f);
         setBottom(worldBounds.getBottom() + 0.35f);
     }
 
-   @Override
-    public void action() {
-
-    }
 }
 
